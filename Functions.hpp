@@ -115,7 +115,7 @@ enum class NeighborsState {
 
 NeighborsState checkIfNewCluster(const array<array<unsigned int,L>,L>& lattice
     , const unsigned i, const unsigned j
-    , const unsigned max, unsigned& val)
+    , const unsigned max, unsigned& val, unsigned& val2)
 {
 
     if (i != 0 && j != 0) {
@@ -123,17 +123,25 @@ NeighborsState checkIfNewCluster(const array<array<unsigned int,L>,L>& lattice
         bool isLeftOccupied = false;
         
         if ((lattice[i-1][j] == 0) && (lattice[i][j-1] == 0)) return NeighborsState::unoccupied;
-        else if (lattice[i-1][j] != 0 && lattice[i-1][j] != 1) {
+        if (lattice[i-1][j] != 0 && lattice[i-1][j] != 1) {
             val = lattice[i-1][j];
             isAboveOccupied = true;
         }
-        else if (lattice[i][j-1] != 0 && lattice[i][j-1] != 1) {
-            val = lattice[i][j-1];
+        if (lattice[i][j-1] != 0 && lattice[i][j-1] != 1) {
+            val2 = lattice[i][j-1];
             isLeftOccupied = true;
         }
-        if (isAboveOccupied && isLeftOccupied) return NeighborsState::bothOccupied;
-        else if (isAboveOccupied && !isLeftOccupied) return NeighborsState::aboveOccupied;
-        else if (!isAboveOccupied && isLeftOccupied) return NeighborsState::leftOccupied;
+
+        if (val == val2) return NeighborsState::aboveOccupied;
+        if (isAboveOccupied && isLeftOccupied) {
+            return NeighborsState::bothOccupied;
+        }
+        else if (isAboveOccupied && !isLeftOccupied) {
+            return NeighborsState::aboveOccupied;
+        }
+        else if (!isAboveOccupied && isLeftOccupied) {
+             return NeighborsState::leftOccupied;
+        }
     }
     else {
         if (i == 0 && j == 0) return NeighborsState::unoccupied;
@@ -158,7 +166,7 @@ NeighborsState checkIfNewCluster(const array<array<unsigned int,L>,L>& lattice
 
 void clusterDistribution(array<array<unsigned int,L>,L>& lattice)
 {
-    map<unsigned int, unsigned int> M;
+    map<unsigned int, int> M;
     unsigned int k = 2;
 
     for (auto i = 0; i < lattice.size(); ++i) {
@@ -176,15 +184,32 @@ void clusterDistribution(array<array<unsigned int,L>,L>& lattice)
     for (auto i = 0; i < lattice.size(); ++i) {
         for (auto j = 0; j < lattice.size(); ++j) {
             if (lattice[i][j] == 1) {
-                unsigned value;
-                if (checkIfNewCluster(lattice, i, j, lattice.size()-1, value) == NeighborsState::unoccupied) {
+                unsigned value, value2;
+                if (NeighborsState::unoccupied == checkIfNewCluster(lattice, i, j, lattice.size()-1, value, value2)) {
                     lattice[i][j] = k;
                     ++M[k];
                     ++k;
                 }
-                else if ()
-                else if (checkIfNewCluster(lattice, i, j, lattice.size()-1, value) == NeighborsState::aboveOccupied
-                    || checkIfNewCluster(lattice, i, j, lattice.size()-1, value) == NeighborsState::leftOccupied) {
+                else if (NeighborsState::bothOccupied == checkIfNewCluster(lattice, i, j, lattice.size()-1, value, value2)) {
+                    lattice[i][j] = value;
+                    // cout << "value=" << value << endl;
+                    // cout << "value2=" << value2 << endl;
+                    // cout << "before M[value]=" << M[value] << endl;
+                    // cout << "before M[value2]=" << M[value2] << endl;
+                    M[value] += M[value2] + 1;
+                    M[value2]  = -M[value];
+                    // cout << "after M[value]=" << M[value] << endl;
+                    // cout << "after M[value2]=" << M[value2] << endl;
+                    // cout << endl;
+                    for (auto i = 0; i < lattice.size(); ++i) {
+                        for (auto j = 0; j < lattice.size(); ++j) {
+                            if (lattice[i][j] == value2)
+                                lattice[i][j] = value;
+                        }
+                    }
+                }
+                else if (NeighborsState::aboveOccupied == checkIfNewCluster(lattice, i, j, lattice.size()-1, value, value2)
+                    || NeighborsState::leftOccupied == checkIfNewCluster(lattice, i, j, lattice.size()-1, value, value2)) {
                     lattice[i][j] = value;
                     ++M[value];
                 }
@@ -194,7 +219,8 @@ void clusterDistribution(array<array<unsigned int,L>,L>& lattice)
     }
     
     for (auto k = 2; k < M.size()+2; ++k) {
-        cout << "M[" << k << "] = " << M[k] << endl;
+        if (M[k] > 0)
+            cout << "M[" << k << "] = " << M[k] << endl;
     }
 }
 
