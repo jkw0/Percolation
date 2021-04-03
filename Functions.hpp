@@ -5,7 +5,7 @@
 using namespace std;
 
 /* GLOBALS*/
-const unsigned int L = 5;
+const unsigned int L = 10;
 double p = 0.7;
 array<array<unsigned int,L>,L> Lattice = {0};
 //**********//
@@ -14,7 +14,7 @@ void printLattice(const array<array<unsigned int,L>,L>& lattice)
 {
     for (auto i = 0; i < lattice.size(); ++i) {
         for (auto j = 0; j < lattice.size(); ++j) {
-            cout << lattice[i][j] << " ";
+            cout << lattice[i][j] << "\t";
         }
         cout << endl;
     }
@@ -44,8 +44,8 @@ array<array<unsigned int,L>,L> initLattice()
 void burnCellsWithChecks(array<array<unsigned int,L>,L>& lattice, unsigned i, unsigned j, unsigned max, unsigned t)
 {
     if (i != 0 && j != 0 && i != max && j != max) {
-        cout << "i=" << i << " j=" << j << endl;
-        cout << "i != 0 && j != 0 && i != max && j != max" << endl;
+        // cout << "i=" << i << " j=" << j << endl;
+        // cout << "i != 0 && j != 0 && i != max && j != max" << endl;
         if (lattice[i-1][j] == 1) lattice[i-1][j] = t;
         if (lattice[i+1][j] == 1) lattice[i+1][j] = t;
         if (lattice[i][j-1] == 1) lattice[i][j-1] = t;
@@ -53,54 +53,54 @@ void burnCellsWithChecks(array<array<unsigned int,L>,L>& lattice, unsigned i, un
     }
     else {
         if (i == 0 && j == 0) {
-            cout << "i=" << i << " j=" << j << endl;
-            cout << "i == 0 && j == 0" << endl;
+            // cout << "i=" << i << " j=" << j << endl;
+            // cout << "i == 0 && j == 0" << endl;
             if (lattice[i+1][j] == 1) lattice[i+1][j] = t;
             if (lattice[i][j+1] == 1) lattice[i][j+1] = t; 
         }
         else if (i == max && j == max) {
-            cout << "i=" << i << " j=" << j << endl;
-            cout << "i == max && j == max" << endl;
+            // cout << "i=" << i << " j=" << j << endl;
+            // cout << "i == max && j == max" << endl;
             if (lattice[i-1][j] == 1) lattice[i-1][j] = t;
             if (lattice[i][j-1] == 1) lattice[i][j-1] = t;
         }
         else if (i == 0 && j == max) {
-            cout << "i=" << i << " j=" << j << endl;
-            cout << "i == 0 && j == max" << endl;
+            // cout << "i=" << i << " j=" << j << endl;
+            // cout << "i == 0 && j == max" << endl;
             if (lattice[i+1][j] == 1) lattice[i+1][j] = t;
             if (lattice[i][j-1] == 1) lattice[i][j-1] = t;
         }
         else if (i == max && j == 0) {
-            cout << "i=" << i << " j=" << j << endl;
-            cout << "i == max && j == 0" << endl;
+            // cout << "i=" << i << " j=" << j << endl;
+            // cout << "i == max && j == 0" << endl;
             if (lattice[i-1][j] == 1) lattice[i-1][j] = t;
             if (lattice[i][j+1] == 1) lattice[i][j+1] = t; 
         }
         else {
             if (i == 0) {
-                cout << "i=" << i << " j=" << j << endl;
-                cout << "i == 0" << endl;
+                // cout << "i=" << i << " j=" << j << endl;
+                // cout << "i == 0" << endl;
                 if (lattice[i+1][j] == 1) lattice[i+1][j] = t;
                 if (lattice[i][j-1] == 1) lattice[i][j-1] = t;
                 if (lattice[i][j+1] == 1) lattice[i][j+1] = t; 
             }
             else if (j == 0) {
-                cout << "i=" << i << " j=" << j << endl;
-                cout << "j == 0" << endl;
+                // cout << "i=" << i << " j=" << j << endl;
+                // cout << "j == 0" << endl;
                 if (lattice[i-1][j] == 1) lattice[i-1][j] = t;
                 if (lattice[i+1][j] == 1) lattice[i+1][j] = t;
                 if (lattice[i][j+1] == 1) lattice[i][j+1] = t; 
             }
             else if (i == max) {
-                cout << "i=" << i << " j=" << j << endl;
-                cout << "i == max" << endl;
+                // cout << "i=" << i << " j=" << j << endl;
+                // cout << "i == max" << endl;
                 if (lattice[i-1][j] == 1) lattice[i-1][j] = t;
                 if (lattice[i][j-1] == 1) lattice[i][j-1] = t;
                 if (lattice[i][j+1] == 1) lattice[i][j+1] = t; 
             }
             else if (j == max) {
-                cout << "i=" << i << " j=" << j << endl;
-                cout << "j == max" << endl;
+                // cout << "i=" << i << " j=" << j << endl;
+                // cout << "j == max" << endl;
                 if (lattice[i-1][j] == 1) lattice[i-1][j] = t;
                 if (lattice[i+1][j] == 1) lattice[i+1][j] = t;
                 if (lattice[i][j-1] == 1) lattice[i][j-1] = t;
@@ -111,26 +111,59 @@ void burnCellsWithChecks(array<array<unsigned int,L>,L>& lattice, unsigned i, un
 
 void burningMethod(array<array<unsigned int,L>,L>& lattice)
 {
+    std::pair<int,int> endIdx;
+    bool leave = false;
+    for (int i = (lattice.size()-1); i >= 0; --i) {
+        for (int j = (lattice.size()-1); j >= 0; --j) {
+            if (lattice[i][j] == 1) {
+                endIdx.first = i;
+                endIdx.second = j;
+                leave = true;
+                break;
+            }
+        }
+        if (leave) break;
+    }
+    // cout << "endIdxfirst=" << endIdx.first << ", endIdxsecond=" << endIdx.second << endl;
+    cout << endl;
     for (auto i = 0; i < lattice.size(); ++i)
         if (lattice[0][i] == 1)
             lattice[0][i] = 2;
 
     unsigned int rows = 0;
     unsigned int t = 2;
-    do {
+    bool stop = false;
+    while(t < lattice.size()*lattice.size() && stop == false) {
+        cout << endl;
+        // cout << "t=" << t << endl;
+        // cout << "rows=" << rows << endl;
         std::vector<std::pair<int, int>> cells;
         cells.resize(0);
         for (auto i = 0; i < lattice.size(); ++i)
             for (auto j = 0; j < lattice.size(); ++j)
                 if (lattice[i][j] == t)
+                {
+                    // cout << "OK : i=" << i << ", j=" << j << "lattice=" << lattice[i][j] << " t=" << t << endl;
                     cells.push_back(std::pair<int,int>(i,j));
+                }
+                else {
+                    // cout << "NIE : i=" << i << ", j=" << j << "lattice=" << lattice[i][j] << " t=" << t << endl;
+                }
 
         for (std::pair<int, int> idx : cells)
+        {
+            // cout << "Burning : i=" << idx.first << ", j=" << idx.second << endl;
             burnCellsWithChecks(lattice, idx.first, idx.second, lattice.size()-1, t+1);
-            
+            if (1 != lattice[endIdx.first][endIdx.second])
+            {
+                // cout << "END END END" << endl;
+                stop = true;
+            }
+        }
+        // cout << "stop=" << (stop ? "true\n" : "false\n");
         ++rows;
         ++t;
-    } while (rows != lattice.size());
+    }
 }
 
 enum class NeighborsState {
@@ -220,15 +253,15 @@ void clusterDistribution(array<array<unsigned int,L>,L>& lattice)
                 }
                 else if (NeighborsState::bothOccupied == checkIfNewCluster(lattice, i, j, lattice.size()-1, value, value2)) {
                     lattice[i][j] = value;
-                    cout << "i=" << i << " j=" << j << endl;
-                    cout << "value=" << value << endl;
-                    cout << "value2=" << value2 << endl;
-                    cout << "before M[value]=" << M[value] << endl;
-                    cout << "before M[value2]=" << M[value2] << endl;
+                    // cout << "i=" << i << " j=" << j << endl;
+                    // cout << "value=" << value << endl;
+                    // cout << "value2=" << value2 << endl;
+                    // cout << "before M[value]=" << M[value] << endl;
+                    // cout << "before M[value2]=" << M[value2] << endl;
                     M[value] += M[value2] + 1;
                     M[value2]  = -M[value];
-                    cout << "after M[value]=" << M[value] << endl;
-                    cout << "after M[value2]=" << M[value2] << endl;
+                    // cout << "after M[value]=" << M[value] << endl;
+                    // cout << "after M[value2]=" << M[value2] << endl;
                     cout << endl;
                     for (auto i = 0; i < lattice.size(); ++i) {
                         for (auto j = 0; j < lattice.size(); ++j) {
