@@ -1,16 +1,14 @@
 #include <iostream>
-#include <array>
+#include <vector>
 #include <map>
 #include <random>
 using namespace std;
 
 /* GLOBALS*/
-const unsigned int L = 10;
-double p = 0.7;
-array<array<unsigned int,L>,L> Lattice = {0};
+
 //**********//
 
-void printLattice(const array<array<unsigned int,L>,L>& lattice)
+void printLattice(const vector<vector<unsigned int>>& lattice)
 {
     for (auto i = 0; i < lattice.size(); ++i) {
         for (auto j = 0; j < lattice.size(); ++j) {
@@ -29,19 +27,19 @@ double getRandom()
     return dis(gen);
 }
 
-array<array<unsigned int,L>,L> initLattice()
+vector<vector<unsigned int>> initLattice(vector<vector<unsigned int>>& lattice, double p)
 {
-    for (auto i = 0; i < Lattice.size(); ++i) {
-        for (auto j = 0; j < Lattice.size(); ++j) {
+    for (auto i = 0; i < lattice.size(); ++i) {
+        for (auto j = 0; j < lattice.size(); ++j) {
             auto R = getRandom();
-            if (R < p) Lattice[i][j] = 1;
-            else Lattice[i][j] = 0;
+            if (R < p) lattice[i][j] = 1;
+            else lattice[i][j] = 0;
         }
     }
-    return Lattice;
+    return lattice;
 }
 
-void burnCellsWithChecks(array<array<unsigned int,L>,L>& lattice, unsigned i, unsigned j, unsigned max, unsigned t)
+void burnCellsWithChecks(vector<vector<unsigned int>>& lattice, unsigned i, unsigned j, unsigned max, unsigned t)
 {
     if (i != 0 && j != 0 && i != max && j != max) {
         // cout << "i=" << i << " j=" << j << endl;
@@ -109,7 +107,7 @@ void burnCellsWithChecks(array<array<unsigned int,L>,L>& lattice, unsigned i, un
     }
 }
 
-void burningMethod(array<array<unsigned int,L>,L>& lattice)
+void burningMethod(vector<vector<unsigned int>>& lattice)
 {
     std::pair<int,int> endIdx;
     bool leave = false;
@@ -125,7 +123,7 @@ void burningMethod(array<array<unsigned int,L>,L>& lattice)
         if (leave) break;
     }
     // cout << "endIdxfirst=" << endIdx.first << ", endIdxsecond=" << endIdx.second << endl;
-    cout << endl;
+    // cout << endl;
     for (auto i = 0; i < lattice.size(); ++i)
         if (lattice[0][i] == 1)
             lattice[0][i] = 2;
@@ -134,7 +132,7 @@ void burningMethod(array<array<unsigned int,L>,L>& lattice)
     unsigned int t = 2;
     bool stop = false;
     while(t < lattice.size()*lattice.size() && stop == false) {
-        cout << endl;
+        // cout << endl;
         // cout << "t=" << t << endl;
         // cout << "rows=" << rows << endl;
         std::vector<std::pair<int, int>> cells;
@@ -154,11 +152,14 @@ void burningMethod(array<array<unsigned int,L>,L>& lattice)
         {
             // cout << "Burning : i=" << idx.first << ", j=" << idx.second << endl;
             burnCellsWithChecks(lattice, idx.first, idx.second, lattice.size()-1, t+1);
-            if (1 != lattice[endIdx.first][endIdx.second])
-            {
-                // cout << "END END END" << endl;
-                stop = true;
+            for (int i = 0; i < lattice.size(); ++i) {
+                if (1 != lattice[endIdx.first][i] && 0 != lattice[endIdx.first][i])
+                {
+                    cout << "END END END" << endl;
+                    stop = true;
+                }
             }
+            
         }
         // cout << "stop=" << (stop ? "true\n" : "false\n");
         ++rows;
@@ -174,7 +175,7 @@ enum class NeighborsState {
     other
 };
 
-NeighborsState checkIfNewCluster(const array<array<unsigned int,L>,L>& lattice
+NeighborsState checkIfNewCluster(const vector<vector<unsigned int>>& lattice
     , const unsigned i, const unsigned j
     , const unsigned max, unsigned& val, unsigned& val2)
 {
@@ -225,7 +226,7 @@ NeighborsState checkIfNewCluster(const array<array<unsigned int,L>,L>& lattice
     return NeighborsState::other;
 }
 
-void clusterDistribution(array<array<unsigned int,L>,L>& lattice)
+void clusterDistribution(vector<vector<unsigned int>>& lattice)
 {
     map<unsigned int, int> M;
     unsigned int k = 2;
@@ -262,7 +263,7 @@ void clusterDistribution(array<array<unsigned int,L>,L>& lattice)
                     M[value2]  = -M[value];
                     // cout << "after M[value]=" << M[value] << endl;
                     // cout << "after M[value2]=" << M[value2] << endl;
-                    cout << endl;
+                    // cout << endl;
                     for (auto i = 0; i < lattice.size(); ++i) {
                         for (auto j = 0; j < lattice.size(); ++j) {
                             if (lattice[i][j] == value2)

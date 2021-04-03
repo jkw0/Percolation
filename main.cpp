@@ -2,9 +2,15 @@
 #include "Functions.hpp"
 using namespace std;
 
-int main()
+
+int main(int argc, char *argv[])
 {
-    auto initialLattice = initLattice();
+    const unsigned int L = atoi(argv[1]);
+    const double p = atof(argv[2]);
+    vector<vector<unsigned int>> Lattice;
+    Lattice.resize(L, vector<unsigned int>(L));
+    
+    auto initialLattice = initLattice(Lattice, p);
     printLattice(initialLattice);
 
     auto burnedLattice = initialLattice;
