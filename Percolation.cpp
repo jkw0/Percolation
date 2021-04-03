@@ -11,7 +11,7 @@ int main()
     burningMethod(burnedLattice);
     printLattice(burnedLattice);
 
-    auto clusteredLettice = initialLattice;
-    clusterDistribution(clusteredLettice);
-    printLattice(clusteredLettice);
+    // auto clusteredLettice = initialLattice;
+    // clusterDistribution(clusteredLettice);
+    // printLattice(clusteredLettice);
 }
