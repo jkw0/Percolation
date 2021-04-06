@@ -18,7 +18,8 @@ int main(int argc, char *argv[])
     Lattice.resize(L, vector<unsigned int>(L));
     
     ofstream ofs;
-    ofs.open("Ave_L5T5.txt", ios::out);
+    string name = "Ave_L" + sL + "T" + sT + ".txt"; 
+    ofs.open(name, ios::out);
     ofs << "p  PFlow  MaxCluster\n";
     ofs.close();
 
@@ -30,8 +31,8 @@ int main(int argc, char *argv[])
         for (int i = T; i > 0; --i) {
             cout << "TRIAL = " << i << endl;
             auto initialLattice = initLattice(Lattice, p0);
-            cout << "Initial" << endl;
-            printLattice(initialLattice);
+            // cout << "Initial" << endl;
+            // printLattice(initialLattice);
             auto burnedLattice = initialLattice;
             int connected = burningMethod(burnedLattice) ? 1 : 0;
             connectionData.push_back(connected);
@@ -39,8 +40,8 @@ int main(int argc, char *argv[])
             auto clusteredLettice = initialLattice;
             auto max_el = clusterDistribution(clusteredLettice);
             maxClusterData.push_back(max_el);
-            cout << "Clustered" << endl;
-            printLattice(clusteredLettice);
+            // cout << "Clustered" << endl;
+            // printLattice(clusteredLettice);
         }
         p0 += dp;
         cout << "p0=" << p0 << ", dp=" << dp << ", pk=" << pk << endl;
