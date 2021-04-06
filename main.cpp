@@ -5,19 +5,53 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    const unsigned int L = atoi(argv[1]);
-    const double p = atof(argv[2]);
+    // if (argc < 6)
+    //     cout << "Not enough arguments ;)" << std::endl;
+    string sL = argv[1];
+    string sT = argv[2];
+    const unsigned int L = atoi(sL.c_str());
+    const unsigned int T = atoi(sT.c_str());
+    double p0 = atof(argv[3]);
+    const double dp = atof(argv[4]);
+    const double pk = atof(argv[5]);
     vector<vector<unsigned int>> Lattice;
     Lattice.resize(L, vector<unsigned int>(L));
     
-    auto initialLattice = initLattice(Lattice, p);
-    printLattice(initialLattice);
+    ofstream ofs;
+    ofs.open("Ave_L5T5.txt", ios::out);
+    ofs << "p  PFlow  MaxCluster\n";
+    ofs.close();
 
-    auto burnedLattice = initialLattice;
-    burningMethod(burnedLattice);
-    printLattice(burnedLattice);
+    vector<int> connectionData;
+    vector<int> maxClusterData;
 
-    // auto clusteredLettice = initialLattice;
-    // clusterDistribution(clusteredLettice);
-    // printLattice(clusteredLettice);
+    while(p0 <= pk) {
+        cout << "p = " << p0 <<endl;
+        for (int i = T; i > 0; --i) {
+            cout << "TRIAL = " << i << endl;
+            auto initialLattice = initLattice(Lattice, p0);
+            cout << "Initial" << endl;
+            printLattice(initialLattice);
+            auto burnedLattice = initialLattice;
+            int connected = burningMethod(burnedLattice) ? 1 : 0;
+            connectionData.push_back(connected);
+            // printLattice(burnedLattice);
+            auto clusteredLettice = initialLattice;
+            auto max_el = clusterDistribution(clusteredLettice);
+            maxClusterData.push_back(max_el);
+            cout << "Clustered" << endl;
+            printLattice(clusteredLettice);
+        }
+        p0 += dp;
+        cout << "p0=" << p0 << ", dp=" << dp << ", pk=" << pk << endl;
+        double Pflow = averageValue(connectionData);
+        double maxClusterAvg = averageValue(maxClusterData);
+        // cout << "Pflow = " << Pflow << endl;
+        cout << "Max Cluster = " << maxClusterAvg << endl;
+        saveToFileAve(sL, sT, p0, Pflow, maxClusterAvg);
+        connectionData.resize(0);
+        maxClusterData.resize(0);
+        cout << endl;
+    }
+
 }

@@ -2,11 +2,11 @@
 #include <vector>
 #include <map>
 #include <random>
+#include <fstream>
+#include <string>
+#include <algorithm>
+#include <iomanip>
 using namespace std;
-
-/* GLOBALS*/
-
-//**********//
 
 void printLattice(const vector<vector<unsigned int>>& lattice)
 {
@@ -107,8 +107,9 @@ void burnCellsWithChecks(vector<vector<unsigned int>>& lattice, unsigned i, unsi
     }
 }
 
-void burningMethod(vector<vector<unsigned int>>& lattice)
+bool burningMethod(vector<vector<unsigned int>>& lattice)
 {
+    // find the last occupied element
     std::pair<int,int> endIdx;
     bool leave = false;
     for (int i = (lattice.size()-1); i >= 0; --i) {
@@ -141,12 +142,15 @@ void burningMethod(vector<vector<unsigned int>>& lattice)
             for (auto j = 0; j < lattice.size(); ++j)
                 if (lattice[i][j] == t)
                 {
-                    // cout << "OK : i=" << i << ", j=" << j << "lattice=" << lattice[i][j] << " t=" << t << endl;
+                    // cout << "OK : i=" << i << ", j=" << j << " lattice=" << lattice[i][j] << " t=" << t << endl;
                     cells.push_back(std::pair<int,int>(i,j));
                 }
-                else {
-                    // cout << "NIE : i=" << i << ", j=" << j << "lattice=" << lattice[i][j] << " t=" << t << endl;
-                }
+
+        if (cells.empty())
+        {
+            cout << "no connection" << endl;
+            return false;
+        }
 
         for (std::pair<int, int> idx : cells)
         {
@@ -155,7 +159,8 @@ void burningMethod(vector<vector<unsigned int>>& lattice)
             for (int i = 0; i < lattice.size(); ++i) {
                 if (1 != lattice[endIdx.first][i] && 0 != lattice[endIdx.first][i])
                 {
-                    cout << "END END END" << endl;
+                    // cout << "endIdx.first=" << endIdx.first << ", i=" << i << " lattice=" << lattice[endIdx.first][i] << endl;
+                    // cout << "END END END" << endl;
                     stop = true;
                 }
             }
@@ -165,6 +170,9 @@ void burningMethod(vector<vector<unsigned int>>& lattice)
         ++rows;
         ++t;
     }
+    if (stop == true) return true;
+    cout << "sometning went wrong" << endl;
+    return false;
 }
 
 enum class NeighborsState {
@@ -226,7 +234,7 @@ NeighborsState checkIfNewCluster(const vector<vector<unsigned int>>& lattice
     return NeighborsState::other;
 }
 
-void clusterDistribution(vector<vector<unsigned int>>& lattice)
+int clusterDistribution(vector<vector<unsigned int>>& lattice)
 {
     map<unsigned int, int> M;
     unsigned int k = 2;
@@ -254,16 +262,8 @@ void clusterDistribution(vector<vector<unsigned int>>& lattice)
                 }
                 else if (NeighborsState::bothOccupied == checkIfNewCluster(lattice, i, j, lattice.size()-1, value, value2)) {
                     lattice[i][j] = value;
-                    // cout << "i=" << i << " j=" << j << endl;
-                    // cout << "value=" << value << endl;
-                    // cout << "value2=" << value2 << endl;
-                    // cout << "before M[value]=" << M[value] << endl;
-                    // cout << "before M[value2]=" << M[value2] << endl;
                     M[value] += M[value2] + 1;
                     M[value2]  = -M[value];
-                    // cout << "after M[value]=" << M[value] << endl;
-                    // cout << "after M[value2]=" << M[value2] << endl;
-                    // cout << endl;
                     for (auto i = 0; i < lattice.size(); ++i) {
                         for (auto j = 0; j < lattice.size(); ++j) {
                             if (lattice[i][j] == value2)
@@ -281,11 +281,32 @@ void clusterDistribution(vector<vector<unsigned int>>& lattice)
         }
     }
     
-    for (auto k = 2; k < M.size()+2; ++k) {
-        if (M[k] > 0)
-            cout << "M[" << k << "] = " << M[k] << endl;
-    }
+    // for (auto k = 2; k < M.size()+2; ++k) {
+    //     if (M[k] > 0)
+    //         cout << "M[" << k << "] = " << M[k] << endl;
+    // }
+
+    map<unsigned int,int>::iterator max_cluster
+        = max_element(M.begin(),M.end(),
+        [] (const std::pair<unsigned int,int>& a, const std::pair<unsigned int,int>& b)->bool{ return a.second < b.second; } );
+
+    cout << "Returned max cluster = " << max_cluster->second << endl;
+    return max_cluster->second;
 }
 
+double averageValue(const vector<int>& data)
+{
+    return accumulate(data.begin(), data.end(), 0.0)/data.size();
+}
 
+void saveToFileAve(string L, string T, const double p, const double Pflow, const unsigned int smax)
+{
+    string name = "Ave_L" + L + "T" + T + ".txt"; 
+    ofstream file;
+    file.open(name, ios::in | ios::app);
+
+    file << fixed << setprecision(1) << p << "  " << Pflow << "  " << smax << "\n";
+
+    file.close();
+}
 
