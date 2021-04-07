@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 
     vector<int> connectionData;
     vector<int> maxClusterData;
+    map<unsigned int, int> clusterDistMap;
 
     while(p0 <= pk) {
         cout << "p = " << p0 <<endl;
@@ -38,10 +39,12 @@ int main(int argc, char *argv[])
             connectionData.push_back(connected);
             // printLattice(burnedLattice);
             auto clusteredLettice = initialLattice;
-            auto max_el = clusterDistribution(clusteredLettice);
+            auto max_el = clusterDistribution(clusteredLettice, clusterDistMap);
             maxClusterData.push_back(max_el);
+            if (i == T) makeClusterDistribution(clusterDistMap, true);
+            else makeClusterDistribution(clusterDistMap, false);
             // cout << "Clustered" << endl;
-            // printLattice(clusteredLettice);
+            printLattice(clusteredLettice);
         }
         p0 += dp;
         cout << "p0=" << p0 << ", dp=" << dp << ", pk=" << pk << endl;
@@ -50,8 +53,9 @@ int main(int argc, char *argv[])
         // cout << "Pflow = " << Pflow << endl;
         cout << "Max Cluster = " << maxClusterAvg << endl;
         saveToFileAve(sL, sT, p0, Pflow, maxClusterAvg);
-        connectionData.resize(0);
-        maxClusterData.resize(0);
+        connectionData.clear();
+        maxClusterData.clear();
+        clusterDistMap.clear();
         cout << endl;
     }
 

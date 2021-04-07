@@ -12,11 +12,11 @@ void printLattice(const vector<vector<unsigned int>>& lattice)
 {
     for (auto i = 0; i < lattice.size(); ++i) {
         for (auto j = 0; j < lattice.size(); ++j) {
-            // cout << lattice[i][j] << "\t";
+            cout << lattice[i][j] << "\t";
         }
-        // cout << endl;
+        cout << endl;
     }
-    // cout << endl;
+    cout << endl;
 }
 
 double getRandom()
@@ -241,7 +241,7 @@ NeighborsState checkIfNewCluster(const vector<vector<unsigned int>>& lattice
     return NeighborsState::other;
 }
 
-int clusterDistribution(vector<vector<unsigned int>>& lattice)
+int clusterDistribution(vector<vector<unsigned int>>& lattice, map<unsigned int, int>& distribution)
 {
     map<unsigned int, int> M;
     unsigned int k = 2;
@@ -301,17 +301,59 @@ int clusterDistribution(vector<vector<unsigned int>>& lattice)
         }
     }
     
-    // for (auto k = 2; k < M.size()+2; ++k) {
-    //     if (M[k] > 0)
-    //         // cout << "M[" << k << "] = " << M[k] << endl;
-    // }
+    for (auto k = 2; k < M.size()+2; ++k) {
+        if (M[k] > 0)
+            cout << "M[" << k << "] = " << M[k] << endl;
+    }
 
     map<unsigned int,int>::iterator max_cluster
         = max_element(M.begin(),M.end(),
         [] (const std::pair<unsigned int,int>& a, const std::pair<unsigned int,int>& b)->bool{ return a.second < b.second; } );
 
     // cout << "Returned max cluster = " << max_cluster->second << endl;
+    distribution = M;
     return max_cluster->second;
+}
+
+map<int, int> makeClusterDistribution(const map<unsigned int, int>& M, bool clear)
+{
+    map<int, int> distr;
+    for (const auto& cluster : M)
+        if (cluster.second > 0)
+            ++distr[cluster.second];
+
+    static map<int, int> averageDistribution;
+
+    if (clear)
+    {
+        cout << "clear" << endl;
+        averageDistribution.clear();
+    }
+
+    for (const auto& cluster : distr) {
+        cout << "add val=" << cluster.first <<endl;
+        averageDistribution[cluster.first] += cluster.second;
+    }
+
+    for (const auto& cluster : averageDistribution) {
+        cout << "s:" << cluster.first << " ns:" << cluster.second << endl;
+    }
+
+    return averageDistribution;
+}
+
+map<int, int> accumulateAverageClusterDistributionData(const map<int, int>& distr, bool clear)
+{
+    static map<int, int> averageDistribution;
+
+    if (clear)
+        averageDistribution.clear();
+
+    for (const auto& cluster : distr) {
+        ++averageDistribution[cluster.second];
+    }
+
+    return averageDistribution;
 }
 
 double averageValue(const vector<int>& data)
@@ -319,13 +361,26 @@ double averageValue(const vector<int>& data)
     return accumulate(data.begin(), data.end(), 0.0)/data.size();
 }
 
-void saveToFileAve(string L, string T, const double p, const double Pflow, const unsigned int smax)
+void saveToFileAve(const string& L, const string& T, const double p, const double Pflow, const unsigned int smax)
 {
     string name = "Ave_L" + L + "T" + T + ".txt"; 
     ofstream file;
-    file.open(name, ios::in | ios::app);
+    file.open(name, ios::out | ios::app);
 
     file << fixed << setprecision(1) << p << "  " << Pflow << "  " << smax << "\n";
+
+    file.close();
+}
+
+void saveToFileAve(const string& L, const string& T, const double p, const map<int, int>& distr)
+{
+    string name = "dist_p" + to_string(p) + "L" + L + "T" + T + ".txt"; 
+    ofstream file;
+    file.open(name, ios::out | ios::app);
+
+    // for (const auto& cluster : distr) {
+
+    // }
 
     file.close();
 }
