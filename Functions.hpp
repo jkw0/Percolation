@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <iomanip>
+#include <numeric>
 using namespace std;
 
 void printLattice(const vector<vector<unsigned int>>& lattice)
@@ -19,19 +20,12 @@ void printLattice(const vector<vector<unsigned int>>& lattice)
     cout << endl;
 }
 
-double getRandom()
-{
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_real_distribution<double> dis(0, 1);
-    return dis(gen);
-}
-
-vector<vector<unsigned int>> initLattice(vector<vector<unsigned int>>& lattice, double p)
+vector<vector<unsigned int>> initLattice(vector<vector<unsigned int>>& lattice, double p
+    , mt19937& gen, uniform_real_distribution<double>& dis)
 {
     for (auto i = 0; i < lattice.size(); ++i) {
         for (auto j = 0; j < lattice.size(); ++j) {
-            auto R = getRandom();
+            auto R = dis(gen);
             if (R < p) lattice[i][j] = 1;
             else lattice[i][j] = 0;
         }
@@ -301,10 +295,10 @@ int clusterDistribution(vector<vector<unsigned int>>& lattice, map<unsigned int,
         }
     }
     
-    for (auto k = 2; k < M.size()+2; ++k) {
-        if (M[k] > 0)
-            cout << "M[" << k << "] = " << M[k] << endl;
-    }
+    // for (auto k = 2; k < M.size()+2; ++k) {
+    //     if (M[k] > 0)
+    //         cout << "M[" << k << "] = " << M[k] << endl;
+    // }
 
     map<unsigned int,int>::iterator max_cluster
         = max_element(M.begin(),M.end(),
@@ -315,7 +309,7 @@ int clusterDistribution(vector<vector<unsigned int>>& lattice, map<unsigned int,
     return max_cluster->second;
 }
 
-map<int, int> makeClusterDistribution(const map<unsigned int, int>& M, bool clear)
+map<int, int> cummulativeClusterDistribution(const map<unsigned int, int>& M, bool clear)
 {
     map<int, int> distr;
     for (const auto& cluster : M)
@@ -324,8 +318,7 @@ map<int, int> makeClusterDistribution(const map<unsigned int, int>& M, bool clea
 
     static map<int, int> averageDistribution;
 
-    if (clear)
-    {
+    if (clear) {
         cout << "clear" << endl;
         averageDistribution.clear();
     }
@@ -342,18 +335,21 @@ map<int, int> makeClusterDistribution(const map<unsigned int, int>& M, bool clea
     return averageDistribution;
 }
 
-map<int, int> accumulateAverageClusterDistributionData(const map<int, int>& distr, bool clear)
+map<int, double> normalizedClusterDistributionData(const map<int, int>& distr, const unsigned int T)
 {
-    static map<int, int> averageDistribution;
-
-    if (clear)
-        averageDistribution.clear();
+    map<int, double> normalizedDistribution;
+    // cout << "T=" << (double)1/(10*T) << endl;
+    const double Tsmall = (double)1/(10*T);
 
     for (const auto& cluster : distr) {
-        ++averageDistribution[cluster.second];
+        normalizedDistribution[cluster.first] = cluster.second*Tsmall;
     }
 
-    return averageDistribution;
+    for (const auto& cluster : normalizedDistribution) {
+        cout << "s:" << cluster.first << " ns:" << cluster.second << endl;
+    }
+
+    return normalizedDistribution;
 }
 
 double averageValue(const vector<int>& data)

@@ -26,12 +26,18 @@ int main(int argc, char *argv[])
     vector<int> connectionData;
     vector<int> maxClusterData;
     map<unsigned int, int> clusterDistMap;
+    map<int, int> cummulativeDistMap;
+    map<int, double> normalizedDistMap;
+
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<double> dis(0, 1);
 
     while(p0 <= pk) {
         cout << "p = " << p0 <<endl;
         for (int i = T; i > 0; --i) {
-            cout << "TRIAL = " << i << endl;
-            auto initialLattice = initLattice(Lattice, p0);
+            cout << endl << "TRIAL = " << i << endl;
+            auto initialLattice = initLattice(Lattice, p0, gen, dis);
             // cout << "Initial" << endl;
             // printLattice(initialLattice);
             auto burnedLattice = initialLattice;
@@ -41,11 +47,13 @@ int main(int argc, char *argv[])
             auto clusteredLettice = initialLattice;
             auto max_el = clusterDistribution(clusteredLettice, clusterDistMap);
             maxClusterData.push_back(max_el);
-            if (i == T) makeClusterDistribution(clusterDistMap, true);
-            else makeClusterDistribution(clusterDistMap, false);
+            if (i == T) cummulativeClusterDistribution(clusterDistMap, true);
+            if (i == 1) cummulativeDistMap = cummulativeClusterDistribution(clusterDistMap, false);
+            else cummulativeClusterDistribution(clusterDistMap, false);
             // cout << "Clustered" << endl;
-            printLattice(clusteredLettice);
+            // printLattice(clusteredLettice);
         }
+        normalizedDistMap = normalizedClusterDistributionData(cummulativeDistMap, T);
         p0 += dp;
         cout << "p0=" << p0 << ", dp=" << dp << ", pk=" << pk << endl;
         double Pflow = averageValue(connectionData);
@@ -56,6 +64,8 @@ int main(int argc, char *argv[])
         connectionData.clear();
         maxClusterData.clear();
         clusterDistMap.clear();
+        cummulativeDistMap.clear();
+        normalizedDistMap.clear();
         cout << endl;
     }
 
