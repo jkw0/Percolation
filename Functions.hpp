@@ -84,11 +84,23 @@ map<string, string> parseInput()
     inputData["pk"] = pk;
     inputData["dp"] = dp;
 
-    for (const auto& data : inputData)
-    {
-        cout << data.first << "  " << data.second << endl;
-    }
-
     return inputData;
 }
 
+void cleanAveFile(const string& L, const string& T)
+{
+    ofstream aveFile;
+    string name = "Ave_L" + L + "T" + T + ".txt"; 
+    aveFile.open(name, ios::out);
+    aveFile << "p  PFlow  MaxCluster\n";
+    aveFile.close();
+}
+
+void cleanDistFile(const string& p, const string& L, const string& T)
+{
+    ofstream distFile;
+    string name = "Dist_p" + p + "L" + L + "T" + T + ".txt";
+    distFile.open(name, ios::out);
+    distFile << "s  n(s,p,L)\n";
+    distFile.close();
+}

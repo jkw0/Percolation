@@ -4,24 +4,6 @@
 #include "ClusterDistribution.hpp"
 using namespace std;
 
-void cleanAveFile(const string& L, const string& T)
-{
-    ofstream aveFile;
-    string name = "Ave_L" + L + "T" + T + ".txt"; 
-    aveFile.open(name, ios::out);
-    aveFile << "p  PFlow  MaxCluster\n";
-    aveFile.close();
-}
-
-void cleanDistFile(const string& p, const string& L, const string& T)
-{
-    ofstream distFile;
-    string name = "Dist_p" + p + "L" + L + "T" + T + ".txt";
-    distFile.open(name, ios::out);
-    distFile << "s  n(s,p,L)\n";
-    distFile.close();
-}
-
 int main(int argc, char *argv[])
 {
     map<string, string> input = parseInput();
@@ -53,7 +35,6 @@ int main(int argc, char *argv[])
         for (int i = T; i > 0; --i) {
             cout << endl << "TRIAL = " << i << endl;
             auto initialLattice = initLattice(Lattice, p0, gen, dis);
-            // cout << "Initial" << endl;
             // printLattice(initialLattice);
             auto burnedLattice = initialLattice;
             int connected = burningMethod(burnedLattice) ? 1 : 0;
@@ -65,18 +46,17 @@ int main(int argc, char *argv[])
             if (i == T) cummulativeClusterDistribution(clusterDistMap, true);
             if (i == 1) cummulativeDistMap = cummulativeClusterDistribution(clusterDistMap, false);
             else cummulativeClusterDistribution(clusterDistMap, false);
-            // cout << "Clustered" << endl;
             // printLattice(clusteredLettice);
         }
         normalizedDistMap = normalizedClusterDistributionData(cummulativeDistMap);
         double Pflow = averageValue(connectionData);
         double maxClusterAvg = averageValue(maxClusterData);
         // cout << "Pflow = " << Pflow << endl;
-        cout << "Max Cluster = " << maxClusterAvg << endl;
+        // cout << "Max Cluster = " << maxClusterAvg << endl;
         saveToFileAve(sL, sT, p0, Pflow, maxClusterAvg);
         saveToFileDist(sL, sT, p0, normalizedDistMap);
+        // cout << "p0=" << p0 << ", dp=" << dp << ", pk=" << pk << endl;
         p0 += dp;
-        cout << "p0=" << p0 << ", dp=" << dp << ", pk=" << pk << endl;
         connectionData.clear();
         maxClusterData.clear();
         clusterDistMap.clear();
