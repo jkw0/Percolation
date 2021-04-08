@@ -70,3 +70,25 @@ void saveToFileDist(const string& L, const string& T, const double p, const map<
     file.close();
 }
 
+map<string, string> parseInput()
+{
+    map<string, string> inputData;
+
+    ifstream file;
+    file.open("perc_ini.txt", ifstream::in);
+    string L, T, p0, pk, dp;
+    file >> L >> T >> p0 >> pk >> dp;
+    inputData["L"] = L;
+    inputData["T"] = T;
+    inputData["p0"] = p0;
+    inputData["pk"] = pk;
+    inputData["dp"] = dp;
+
+    for (const auto& data : inputData)
+    {
+        cout << data.first << "  " << data.second << endl;
+    }
+
+    return inputData;
+}
+

@@ -24,13 +24,14 @@ void cleanDistFile(const string& p, const string& L, const string& T)
 
 int main(int argc, char *argv[])
 {
-    string sL = argv[1];
-    string sT = argv[2];
+    map<string, string> input = parseInput();
+    string sL = input["L"];
+    string sT = input["T"];
     const unsigned int L = atoi(sL.c_str());
     const unsigned int T = atoi(sT.c_str());
-    double p0 = atof(argv[3]);
-    const double dp = atof(argv[4]);
-    const double pk = atof(argv[5]);
+    double p0 = atof(input["p0"].c_str());
+    const double dp = atof(input["dp"].c_str());
+    const double pk = atof(input["pk"].c_str());
     vector<vector<unsigned int>> Lattice;
     Lattice.resize(L, vector<unsigned int>(L));
     
