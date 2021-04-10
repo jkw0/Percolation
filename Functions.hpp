@@ -35,16 +35,17 @@ vector<vector<unsigned int>> initLattice(vector<vector<unsigned int>>& lattice, 
 
 double averageValue(const vector<int>& data)
 {
-    return accumulate(data.begin(), data.end(), 0.0)/data.size();
+    return (double)accumulate(data.begin(), data.end(), 0.0)/data.size();
 }
 
-void saveToFileAve(const string& L, const string& T, const double p, const double Pflow, const unsigned int smax)
+void saveToFileAve(const string& L, const string& T, const double p, const double Pflow, const double smax)
 {
     string name = "Ave_L" + L + "T" + T + ".txt"; 
     ofstream file;
     file.open(name, ios::out | ios::app);
 
-    file << fixed << setprecision(1) << p << "  " << Pflow << "  " << smax << "\n";
+    const unsigned int smaxInt = smax + 0.5;
+    file << fixed << setprecision(2) << p << "  " << Pflow << "  " << smaxInt << "\n";
 
     file.close();
 }
@@ -92,7 +93,7 @@ void cleanAveFile(const string& L, const string& T)
     ofstream aveFile;
     string name = "Ave_L" + L + "T" + T + ".txt"; 
     aveFile.open(name, ios::out);
-    aveFile << "p  PFlow  MaxCluster\n";
+    aveFile << "p  PFlow  <smax>\n";
     aveFile.close();
 }
 

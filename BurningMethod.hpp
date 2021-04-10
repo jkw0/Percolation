@@ -8,6 +8,7 @@ using namespace std;
 
 void burnCellsWithChecks(vector<vector<unsigned int>>& lattice, unsigned i, unsigned j, unsigned max, unsigned t)
 {
+    //NOT ON EDGE
     if (i != 0 && j != 0 && i != max && j != max) {
         // // cout << "i=" << i << " j=" << j << endl;
         // // cout << "i != 0 && j != 0 && i != max && j != max" << endl;
@@ -78,28 +79,31 @@ bool burningMethod(vector<vector<unsigned int>>& lattice)
 {
     // find the last occupied element
     std::pair<int,int> endIdx;
-    bool leave = false;
+    bool foundEndPath = false;
     for (int i = (lattice.size()-1); i >= 0; --i) {
-        for (int j = (lattice.size()-1); j >= 0; --j) {
-            if (lattice[i][j] == 1) {
+        //for (int j = (lattice.size()-1); j >= 0; --j) {
+            if (lattice[lattice.size()-1][i] == 1) {
                 endIdx.first = i;
-                endIdx.second = j;
-                leave = true;
+                //endIdx.second = j;
+                foundEndPath = true;
                 break;
             }
-        }
-        if (leave) break;
+        //}
+        //if (leave) break;
     }
+    if (foundEndPath == false)
+        return false;
+
     // // cout << "endIdxfirst=" << endIdx.first << ", endIdxsecond=" << endIdx.second << endl;
     // // cout << endl;
     for (auto i = 0; i < lattice.size(); ++i)
         if (lattice[0][i] == 1)
             lattice[0][i] = 2;
 
-    unsigned int rows = 0;
+    //unsigned int rows = 0;
     unsigned int t = 2;
     bool stop = false;
-    while(t < lattice.size()*lattice.size() && stop == false) {
+    while(stop == false) {
         // // cout << endl;
         // // cout << "t=" << t << endl;
         // // cout << "rows=" << rows << endl;
@@ -115,7 +119,7 @@ bool burningMethod(vector<vector<unsigned int>>& lattice)
 
         if (cells.empty())
         {
-            // cout << "no connection" << endl;
+            //cout << "no connection" << endl;
             return false;
         }
 
@@ -124,17 +128,17 @@ bool burningMethod(vector<vector<unsigned int>>& lattice)
             // // cout << "Burning : i=" << idx.first << ", j=" << idx.second << endl;
             burnCellsWithChecks(lattice, idx.first, idx.second, lattice.size()-1, t+1);
             for (int i = 0; i < lattice.size(); ++i) {
-                if (1 != lattice[endIdx.first][i] && 0 != lattice[endIdx.first][i])
+                //if (1 != lattice[endIdx.first][i] && 0 != lattice[endIdx.first][i])
+                if ((t+1) == lattice[lattice.size()-1][i])
                 {
                     // // cout << "endIdx.first=" << endIdx.first << ", i=" << i << " lattice=" << lattice[endIdx.first][i] << endl;
-                    // // cout << "END END END" << endl;
+                    //cout << "END END END" << endl;
                     stop = true;
                 }
             }
-            
         }
         // // cout << "stop=" << (stop ? "true\n" : "false\n");
-        ++rows;
+        //++rows;
         ++t;
     }
     if (stop == true) return true;
